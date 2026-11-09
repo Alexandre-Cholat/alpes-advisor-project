@@ -7,6 +7,9 @@
 
 % inside/2, adjacent/2, resort_massif/2
 % summits_in_department/2, high_resorts/2
+%   Sorted list, without duplicates, of the summits lying (via inside) in department D. Use built-in predicate setof/3
+
+
 % commune_with_resort/1, commune_without_resort_near_resort/1
 % highest_summit/3
 % reaches/3, communes_within/3
