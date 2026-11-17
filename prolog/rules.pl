@@ -6,6 +6,17 @@
 % threshold(1500).
 
 % inside/2, adjacent/2, resort_massif/2
+inside(X,Y) :- located_in(Y,X).
+inside(X,Y) :- located_in(X, Z), inside(Z, Y).
+
+adjacent(X, Y) :- neighbour(Y, X).
+adjacent(X, Y) :- neighbour(X, Y).
+
+% TODO: ask if each resort should have one massif? currently we use distinct(M, resort_massif(flaine, M)). to get distinct answers.
+% Massif of a resort, derived from the summits of its commune
+resort_massif(R, M) :- commune(C), resort(R), located_in(R, C), summit(S), located_in(S, C), in_massif(S, M), massif(M).
+
+
 % summits_in_department/2, high_resorts/2
 %   Sorted list, without duplicates, of the summits lying (via inside) in department D. Use built-in predicate setof/3
 
