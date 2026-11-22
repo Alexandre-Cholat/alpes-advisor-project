@@ -6,7 +6,7 @@
 threshold(1500).
 
 % inside/2, adjacent/2, resort_massif/2
-inside(X,Y) :- located_in(Y,X).
+inside(X,Y) :- located_in(X,Y).
 inside(X,Y) :- located_in(X, Z), inside(Z, Y).
 
 adjacent(X, Y) :- neighbour(Y, X).
@@ -21,7 +21,8 @@ resort_massif(R, M) :- commune(C), resort(R), located_in(R, C), summit(S), locat
 summits_in_department(D, L) :- department(D), setof(S, (summit(S), inside(S, D)), L).
 
 % high_resorts/2 : Resorts having a known altitude greater than or equal to Threshold
-high_resorts(Threshold, L) :- setof(resort(R), (altitude(R, A), A > Threshold) , L).
+% wrong: .high_resorts(Threshold, L) :- setof(resort(R), A^(altitude(R, A), A >= Threshold) , L).
+high_resorts(Threshold, L) :- setof(R, A^(resort(R), altitude(R, A), A >= Threshold), L).
 
 
 % commune_with_resort/1, commune_without_resort_near_resort/1
@@ -38,7 +39,7 @@ reaches(A, B, N):- reaches(A, B, N, []).
 reaches(A, B, N, _):- adjacent(A, B), N > 0.
 % list L of prev visited communes. check against L before testing adjacency
 % add A to start of L when trying C instead.
-reaches(A, B, N, L):- N > 1, commune(C), not(member(C, L)), adjacent(A, C), reaches(C, B, N-1, [A|L]).
+reaches(A, B, N, L):- N > 1, commune(C), not(member(C, L)), adjacent(A, C), N1 is N - 1, reaches(C, B, N1, [A|L]).
 
 communes_within(A, N, L):- setof(commune(C), reaches(A, C, N), L).
 
