@@ -5,7 +5,7 @@ Pair: …   Instance: small
 ## Numerical answers
 | Question | Answer |
 |---|---|
-| Q1.1 / Q1.2 | |
+| Q1.1 / Q1.2 | **Q1.1 — Satisfied:** **(c)** (every commune in $\le 1$ dept), **(E3)** (e.g., `megeve` has no resort and neighbours `saint_gervais_les_bains` which has one), **(E4)** (only `les_houches` lacks a dept, and it has no resort). **Not satisfied (FALSE):** **(a)** (`located_in` not transitively closed in raw facts — e.g., `located_in(aiguille_croche, megeve)` and `located_in(megeve, haute_savoie)` hold, but `located_in(aiguille_croche, haute_savoie)` is absent), **(b)** (`neighbour` asymmetric), **(d)** (`plateau_des_saix`, `signal_de_bisanne` not in any commune), **(E1)** (`les_houches` has no dept), **(E2)** (`massif_du_faucigny`, `massif_du_giffre` have no summit $> 2400\text{ m}$). <br> **Q1.2 — False statement & refuting fact:** **(b)** Symmetry of `neighbour` ($\forall x \forall y \, (\text{neighbour}(x, y) \to \text{neighbour}(y, x))$) is refuted by `neighbour(combloux, sallanches).` , as `neighbour(sallanches, combloux).` is absent. |
 | Q2.1 – Q2.2 | **Q2.1:** **(E2)** (3 clauses, Skolem $f(m)$): $\{\neg\text{Massif}(m), \text{Summit}(f(m))\}$, $\{\neg\text{Massif}(m), \text{InMassif}(f(m),m)\}$, $\{\neg\text{Massif}(m), \text{High}(f(m))\}$. **Axiom (c)** (1 clause, no $\exists$): $\{\neg\text{Commune}(c), \neg\text{Department}(d_1), \neg\text{Department}(d_2), \neg\text{LocatedIn}(c,d_1), \neg\text{LocatedIn}(c,d_2), d_1=d_2\}$.<br>**Q2.2:** **(1)** Unifiable, $\text{MGU } \sigma = \{x \mapsto h(a), z \mapsto a\}$, unified: $\text{Neighbour}(h(a), g(a))$. **(2)** Not unifiable (occurs check fails on $y = g(y)$). |
 | Q2.3 (resolvent measurements) | **Provable** `LocatedIn(aiguille_croche, auvergne_rhone_alpes)`: $n=10$ (736 cl.): naive `462`, sos `273`, unit `73` ($\square$); $n=12$ (1,338 cl.): naive `534`, sos `379`, unit `81` ($\square$); $n=14$ (2,204 cl.): naive `606`, sos `501`, unit `89` ($\square$).<br>**False (`refute`)** `LocatedIn(hauteluce, haute_savoie)`: $n=10$: `3 / 18 / 3` ($\square$); $n=12$: `3 / 22 / 3` ($\square$); $n=14$: `3 / 26 / 3` ($\square$).<br>**Not provable** `LocatedIn(les_houches, savoie)`: $n=10$: naive/sos `100,000` (cap), unit `806` (sat.); $n=12$: `100,000 / 100,000 / 1,284`; $n=14$: `100,000 / 100,000 / 1,802`. |
 | Q2.4 – Q2.5 | **Q2.4:** **Unit** is most efficient (Horn KB $\implies$ refutation-complete; avoids non-unit blow-up; SOS beats Naive on multi-step proofs). On unprovable goals, Naive/SOS generate non-unit clauses until the `100,000` cap, whereas Unit saturates cleanly.<br>**Q2.5:** $C(n) = f + n(n-1)(n-2) + n_c\binom{n_d}{2} = \Theta(n^3)$. **Small** ($n=28$): **`19,696`** clauses ($29,800$ incl. massifs); **Medium** ($n=501$): **`125,000,112`** clauses ($140,608,092$ incl. massifs). Eager grounding does not scale $\implies$ first-order unification is needed. |
@@ -20,12 +20,22 @@ Pair: …   Instance: small
 | Q4.5 (brave / cautious, with an exception) | |
 | Q4.6 | |
 
-## Comparison
+
+# Comparison
 | | Propositional resolution | Prolog | ASP |
 |---|---|---|---|
-| Expressiveness | Ground clauses only (no variables; requires $\Theta(n^3)$ eager grounding) | | |
-| Missing information | Open-World Assumption (unprovable = unknown, not false) | | |
-| Termination | Hits cap on unprovable goals (Naive/SOS); Unit saturates on Horn KBs | | |
-| Explainability | Refutation proof tree of resolution steps deriving $\square$ | | |
+| Expressiveness | Ground clauses only (no variables; requires $\Theta(n^3)$ eager grounding) | First-order Horn clauses + NAF (`\+`), recursion & lists (Turing-complete) | Non-monotonic FOL rules over finite domains, choice rules, constraints & aggregates |
+| Missing information | Open-World Assumption (unprovable = unknown, not false) | Closed-World Assumption (CWA) via Negation as Failure (`\+`) | CWA via default negation (`not`), plus explicit strong negation (`-`) for known falsity |
+| Termination | Hits cap on unprovable goals (Naive/SOS); Unit saturates on Horn KBs | Undecidable; top-down DFS loops on cycles unless tabled or depth-bounded | Guaranteed (decidable); finite grounding + CDCL-based solver always terminates |
+| Explainability | Refutation proof tree of resolution steps deriving $\square$ | SLDNF derivation tree / execution trace (`trace`); finite failure tree for NAF | Outputs complete valid answer sets (models) rather than a step-by-step trace |
 
 ## First-order axioms (list or diagram)
+* **(a) Transitivity:** $\forall x \forall y \forall z \, (\text{located\_in}(x, y) \land \text{located\_in}(y, z) \to \text{located\_in}(x, z))$
+* **(b) Symmetry:** $\forall x \forall y \, (\text{neighbour}(x, y) \to \text{neighbour}(y, x))$
+* **(c) $\le 1$ dept/commune:** $\forall c \forall d_1 \forall d_2 \, (\text{commune}(c) \land \text{department}(d_1) \land \text{department}(d_2) \land \text{located\_in}(c, d_1) \land \text{located\_in}(c, d_2) \to d_1 = d_2)$
+* **(d) $\ge 1$ commune/summit:** $\forall s \, (\text{summit}(s) \to \exists c \, (\text{commune}(c) \land \text{located\_in}(s, c)))$
+* **(E1) Dept/commune:** $\forall c \, (\text{commune}(c) \to \exists d \, (\text{department}(d) \land \text{located\_in}(c, d)))$
+* **(E2) Summit $>2400$m/massif:** $\forall m \, (\text{massif}(m) \to \exists s \exists a \, (\text{summit}(s) \land \text{in\_massif}(s, m) \land \text{altitude}(s, a) \land a > 2400))$
+* **(E3) Non-resort near resort:** $\exists c_1 \exists c_2 \exists r \, (\text{commune}(c_1) \land \text{commune}(c_2) \land \text{neighbour}(c_1, c_2) \land \text{resort}(r) \land \text{located\_in}(r, c_2) \land \neg \exists r' \, (\text{resort}(r') \land \text{located\_in}(r', c_1)))$
+* **(E4) Resort in dept:** $\forall r \forall c \, (\text{resort}(r) \land \text{commune}(c) \land \text{located\_in}(r, c) \to \exists d \, (\text{department}(d) \land \text{located\_in}(c, d)))$
+* **(I) & (S):** $(I) \; \forall x \, \neg \text{located\_in}(x, x)$ \| $(S) \; \forall x \exists y \, \text{located\_in}(x, y)$ $\implies$ $\{\text{trans}, I, S\}$ forces infinite models (e.g., $(\mathbb{N}, <)$) by Pigeonhole Principle.
