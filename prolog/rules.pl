@@ -18,6 +18,7 @@ resort_massif(R, M) :- commune(C), resort(R), located_in(R, C), summit(S), locat
 
 
 % summits_in_department/2, high_resorts/2
+summits_in_department(D, L) :- department(D), setof(S, (summit(S), inside(S, D)), L).
 %   Sorted list, without duplicates, of the summits lying (via inside) in department D. Use built-in predicate setof/3
 
 
