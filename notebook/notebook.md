@@ -14,18 +14,18 @@ Pair: …   Instance: small
 | Q3.3 | `communes_within(sallanches, N, L)`: **1 step = 5**, **2 steps = 11**, **3 steps = 12**. **`reachable_naive/2`** does **not** terminate (stack overflow) because `adjacent/2` is symmetric, creating infinite 2-cycles (`A -> B -> A`). **`reachable/2` (tabled)** memoizes subgoals and detects loops to compute the full closure (12 communes), while **`reaches/3` (bounded)** terminates via depth bound `N` and visited list `L`. |
 | Q3.4 (not snowy resorts, resorts without altitude) | `not_snowy/1`: **3** (`[domaine_de_praz_sur_arly, plaine_joux, saint_nicolas_de_veroce]`). `resort_without_altitude/1`: **2** (`[domaine_de_praz_sur_arly, saint_nicolas_de_veroce]`). Adding an altitude $\ge 1500$ for an unknown-altitude resort flips `not_snowy(R)` from `true` to `false`, illustrating **non-monotonic reasoning** under Negation as Failure (NAF) and the Closed-World Assumption (CWA). |
 | Q3.5 | `two_altitudes/1` = `[]`; `asymmetric_neighbour/2` = `[combloux-sallanches]`; `commune_without_department/1` = `[les_houches]`; `summit_without_massif/1` = `[]`. **Why “belongs to no massif” is debatable:** Prolog uses the **Closed-World Assumption (CWA)** (unprovable `in_massif(S, _)` is treated as false), whereas in reality (**Open-World**) every summit belongs to a massif and the link is simply missing from the KB. |
-| Q4.1 (k = 2 and 3: value, number of stays) | |
-| Q4.2 | |
-| Q4.3 – Q4.4 (medium: without "distinct communes"; k = 3, time, stays) | |
-| Q4.5 (brave / cautious, with an exception) | |
-| Q4.6 | |
+| Q4.1 (k = 2 and 3: value, number of stays) | **$k=2$:** optimal value **`5773`**, **`1`** stay (`{les_saisies, saint_nicolas_de_veroce}`). **$k=3$:** optimal value **`7773`**, **`2`** stays (`{flaine, les_saisies, saint_nicolas_de_veroce}` and `{les_saisies, plaine_joux, saint_nicolas_de_veroce}`). Without `#project`, a single stay `stay(S)` can have multiple valid massif assignments `step(S, M)` (e.g. `10` stays $\to$ `40` answer sets on `medium`), so Clingo enumerates one answer set per `step(S, M)` combination. |
+| Q4.2 | Clingo prints **`-5773`** ($k=2$) and **`-7773`** ($k=3$) (and **`-13523`** on `medium`). Clingo's solver engine always minimizes objective functions, so `#maximize` internally negates the weights and reports a negative optimum. |
+| Q4.3 – Q4.4 (medium: without "distinct communes"; k = 3, time, stays) | **Q4.3:** Removing `distinct communes` doubles optimal stays from **`10` to `20`** (optimum rises from `13523` to `14418`), because multiple resorts in `chamonix_mont_blanc` (`4806` m, 5 resorts, 3 massifs) can now be combined ($\binom{5}{3}=10$ all in Chamonix + $\binom{5}{2}\times 1=10$ with `saint_nicolas_de_veroce`).<br>**Q4.4:** `k=3` on `medium`: **`10`** distinct optimal stays (`13523`), solved in **`0.074 s`** (CPU `0.062 s`), versus **`125,000,112`** grounded clauses in Part 2—ASP grounds lazily only over existing relations (`located_in`, `in_massif`) rather than all $O(n^3)$ entity triples. |
+| Q4.5 (brave / cautious, with an exception) | **Without exception:** **Cautious** (certain): `flaine, les_saisies` (`2`); **Brave** (possible): `flaine, les_saisies, domaine_de_praz_sur_arly, saint_nicolas_de_veroce` (`4`; unknown-altitude resorts are possible via `{snowy(R)}`, never certain). **With `exception(flaine)`:** Cautious $\to$ `les_saisies` (`1`), Brave $\to$ `les_saisies, domaine_de_praz_sur_arly, saint_nicolas_de_veroce` (`3`). Shows ASP default negation (`not`) is **non-monotonic** (adding `exception` retracts `snowy(flaine)`). |
+| Q4.6 | **Small:** `two_altitudes(aiguille_croche)` (`1`), `commune_without_department(les_houches)` (`1`), `asymmetric_neighbour(combloux, sallanches)` (`1`), `summit_without_massif` (`0`). **Medium:** `two_altitudes` (`7`: `avoriaz` + 6 summits), `summit_without_massif` (`4`), others `0`. **vs. Prolog:** ASP deduplicates set-based atoms automatically (Prolog yielded `A1 \= A2` twice per pair) and checks both summits & resorts for `two_altitudes` (Prolog checked resorts only, finding `0` on `small` and `1` on `medium`). |
 
 ## Comparison
 | | Propositional resolution | Prolog | ASP |
 |---|---|---|---|
-| Expressiveness | Ground clauses only (no variables; requires $\Theta(n^3)$ eager grounding) | | |
-| Missing information | Open-World Assumption (unprovable = unknown, not false) | | |
-| Termination | Hits cap on unprovable goals (Naive/SOS); Unit saturates on Horn KBs | | |
-| Explainability | Refutation proof tree of resolution steps deriving $\square$ | | |
+| Expressiveness | Ground clauses only (no variables; requires $\Theta(n^3)$ eager grounding) | Horn clauses with variables, lists, recursion, arithmetic, NAF | Variables, choice rules, aggregates (`#max`), `#maximize`, default & classical negation |
+| Missing information | Open-World Assumption (unprovable = unknown, not false) | Closed-World Assumption via NAF (`\+`, unknown collapses to false) | 3-valued epistemic split via choice rules + brave/cautious reasoning (certain vs. possible) |
+| Termination | Hits cap on unprovable goals (Naive/SOS); Unit saturates on Horn KBs | Top-down DFS; can loop infinitely on cyclic graphs without cycle checking | Always terminates on finite ground programs (NP/$\Sigma_2^P$ solver) |
+| Explainability | Refutation proof tree of resolution steps deriving $\square$ | SLDNF resolution trace / witness variable bindings | Explicit answer sets (models) + brave/cautious consequence sets |
 
 ## First-order axioms (list or diagram)
