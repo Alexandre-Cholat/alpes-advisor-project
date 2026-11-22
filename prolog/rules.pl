@@ -17,9 +17,11 @@ adjacent(X, Y) :- neighbour(X, Y).
 resort_massif(R, M) :- commune(C), resort(R), located_in(R, C), summit(S), located_in(S, C), in_massif(S, M), massif(M).
 
 
-% summits_in_department/2, high_resorts/2
+% summits_in_department/2: Sorted list, without duplicates, of the summits lying (via inside) in department D. Use built-in predicate setof/3
 summits_in_department(D, L) :- department(D), setof(S, (summit(S), inside(S, D)), L).
-%   Sorted list, without duplicates, of the summits lying (via inside) in department D. Use built-in predicate setof/3
+
+% high_resorts/2 : Resorts having a known altitude greater than or equal to Threshold
+high_resorts(Threshold, L) :- setof(resort(R), (altitude(R, A), A > Threshold) , L).
 
 
 % commune_with_resort/1, commune_without_resort_near_resort/1
