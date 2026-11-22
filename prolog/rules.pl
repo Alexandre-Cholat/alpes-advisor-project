@@ -31,7 +31,19 @@ commune_without_resort_near_resort(C) :- commune(C),commune(B), adjacent(C, B), 
 % highest_summit/3 : Highest summit S (altitude A) of commune C
 highest_summit(C, S, A):- summit(S), altitude(S, A), located_in(S, C), not((summit(S3), located_in(S3, C), altitude(S3, A3), A3 > A)).
 
-% reaches/3, communes_within/3
+% reaches/3, communes_within/3: Set of communes at most N steps away from A (bounded recursion). reaches(A, B, N): B is at most N steps away from A.
+% initalize with empty list
+reaches(A, B, N):- reaches(A, B, N, []).
+
+% base case
+reaches(A, B, N, _):- adjacent(A, B), N > 0.
+
+% list L of prev visited communes. check against L before testing adjacency
+% add A to start of L when trying C instead.
+reaches(A, B, N, L):- N > 1, commune(C), not(member(C, L)), adjacent(A, C), reaches(C, B, N-1, [A|L]).
+
+communes_within(A, N, L):- setof(commune(C), reaches(A, C, N), L).
+
 % reachable_naive/2, reachable/2   (hint: :- table reachable/2.)
 % snowy/1, not_snowy/1
 % resort_without_altitude/1, summit_without_massif/1
