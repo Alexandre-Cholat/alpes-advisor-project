@@ -25,7 +25,12 @@ high_resorts(Threshold, L) :- setof(resort(R), (altitude(R, A), A > Threshold) ,
 
 
 % commune_with_resort/1, commune_without_resort_near_resort/1
-% highest_summit/3
+commune_with_resort(C) :- commune(C), located_in(R, C), resort(R).
+commune_without_resort_near_resort(C) :- commune(C),commune(B), adjacent(C, B), not(commune_with_resort(C)), commune_with_resort(B).
+
+% highest_summit/3 : Highest summit S (altitude A) of commune C
+highest_summit(C, S, A):- summit(S), altitude(S, A), located_in(S, C), not((summit(S3), located_in(S3, C), altitude(S3, A3), A3 > A)).
+
 % reaches/3, communes_within/3
 % reachable_naive/2, reachable/2   (hint: :- table reachable/2.)
 % snowy/1, not_snowy/1
