@@ -41,7 +41,7 @@ reaches(A, B, N, _):- adjacent(A, B), N > 0.
 % add A to start of L when trying C instead.
 reaches(A, B, N, L):- N > 1, commune(C), not(member(C, L)), adjacent(A, C), N1 is N - 1, reaches(C, B, N1, [A|L]).
 
-communes_within(A, N, L):- setof(commune(C), reaches(A, C, N), L).
+communes_within(A, N, L):- setof(C, reaches(A, C, N), L).
 
 % reachable_naive/2 : will loop infinately ...
 reachable_naive(X, Y) :- adjacent(X, Y).
